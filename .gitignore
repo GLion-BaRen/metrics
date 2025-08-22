@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyzwz
+*.pyzwzw
+.venv
+deploy/logs/
+deploy/grafana/data/
+deploy/grafana/logs/
+deploy/grafana/plugins/

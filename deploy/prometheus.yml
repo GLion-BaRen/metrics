@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s # 每15秒抓取一次
+
+scrape_configs:
+  - job_name: 'flask-app'
+    static_configs:
+      # Flask应用监控 - otlp_app.py (容器内)
+      - targets: ['metrics:5001']
+  
+  - job_name: 'system-metrics'
+    static_configs:
+      # 系统指标监控 - http_metrics.py (容器内)
+      - targets: ['metrics:9100']

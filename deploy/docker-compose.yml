@@ -1,0 +1,68 @@
+version: '3.8'
+services:
+  prometheus:
+    image: bitnami/prometheus:3.5.0-debian-12-r3
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring
+    depends_on:
+      - metrics
+    links:
+      - metrics
+
+  grafana:
+    image: grafana/grafana:nightly-ubuntu
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+      - metrics
+    links:
+      - prometheus
+      - metrics
+
+  metrics:
+    image: metric:0.0.1
+    container_name: metrics
+    ports:
+      - "5001:5001"
+      - "9100:9100"
+    volumes:
+      - ./logs:/hac/logs
+      # 系统监控所需的proc文件系统挂载
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+      - /dev:/dev:ro
+    networks:
+      - monitoring
+    restart: unless-stopped
+    # 系统监控需要特权模式访问系统资源
+    privileged: true
+    # 或者使用更精确的权限控制
+    cap_add:
+      - SYS_ADMIN
+      - NET_ADMIN
+
+volumes:
+  grafana-storage:
+
+networks:
+  monitoring:
+    driver: bridge
